@@ -3,32 +3,186 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tín Hiệu Thị Trường & Phân Tích Forex</title>
+    <title>Trading Signals Dashboard | Financial Hub</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f4f7f6; margin: 0; padding: 20px; }
-        .container { max-width: 1200px; margin: 0 auto; }
-        h1 { text-align: center; color: #1a252f; margin-bottom: 5px; }
-        p.subtitle { text-align: center; color: #7f8c8d; font-size: 14px; margin-bottom: 30px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
-        .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .card-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px; }
-        .channel-name { font-weight: bold; color: #0066cc; font-size: 18px; }
-        .tag { background: #e1f5fe; color: #0288d1; font-size: 12px; padding: 4px 8px; border-radius: 4px; }
-        .update-time { font-size: 12px; color: #95a5a6; margin-bottom: 10px; }
-        .content { font-size: 14px; line-height: 1.6; color: #2c3e50; white-space: pre-wrap; word-wrap: break-word; }
+        :root {
+            --bg-color: #0b0e14;
+            --card-bg: #151924;
+            --card-border: #2a2e3d;
+            --text-primary: #e1e3e6;
+            --text-secondary: #848e9c;
+            --accent-blue: #2962ff;
+            --accent-green: #089981;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 24px 16px;
+            line-height: 1.5;
+        }
+
+        .header {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 32px auto;
+        }
+
+        .header h1 {
+            font-size: 26px;
+            font-weight: 700;
+            margin: 0 0 8px 0;
+            background: linear-gradient(90deg, #2962ff, #00f2fe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 13px;
+            margin: 0;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(8, 153, 129, 0.1);
+            color: var(--accent-green);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 10px;
+            border: 1px solid rgba(8, 153, 129, 0.2);
+        }
+
+        .pulse-dot {
+            width: 7px;
+            height: 7px;
+            background-color: var(--accent-green);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--accent-green);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--card-border);
+            margin-bottom: 14px;
+        }
+
+        .channel-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .tag {
+            background: rgba(41, 98, 255, 0.15);
+            color: #64b5f6;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(41, 98, 255, 0.3);
+        }
+
+        .update-time {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+        }
+
+        .content {
+            font-size: 13.5px;
+            color: var(--text-primary);
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            flex-grow: 1;
+        }
+
+        .content img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 1px solid var(--card-border);
+            margin-top: 14px;
+        }
+
+        footer {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 12px;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid var(--card-border);
+        }
     </style>
 </head>
 <body>
-    <div class="container">
+
+    <div class="header">
         <h1>Tín Hiệu Thị Trường & Phân Tích Forex</h1>
-        <p class="subtitle">Cập nhật định kỳ • Tự động bảo toàn dữ liệu nhóm không có tin mới</p>
-        <div class="grid">
-            <div class="card"><div class="card-header"><span class="channel-name">Data Trader</span><span class="tag">Tiếng Việt</span></div><div class="update-time">Đang kết nối...</div><div class="content">Hệ thống đang quét tín hiệu tiếng Việt từ kênh Data Trader...</div></div>
-            <div class="card"><div class="card-header"><span class="channel-name">VinaFunder</span><span class="tag">Tiếng Việt</span></div><div class="update-time">Đang kết nối...</div><div class="content">Hệ thống đang quét tín hiệu tiếng Việt từ kênh VinaFunder...</div></div>
-            <div class="card"><div class="card-header"><span class="channel-name">Trader Gauls</span><span class="tag">Tiếng Việt</span></div><div class="update-time">Đang kết nối...</div><div class="content">Hệ thống đang quét tín hiệu tiếng Việt từ kênh Trader Gauls...</div></div>
-            <div class="card"><div class="card-header"><span class="channel-name">GBPJPY EURUSD</span><span class="tag">Tiếng Việt</span></div><div class="update-time">Đang kết nối...</div><div class="content">Hệ thống đang quét tín hiệu tiếng Việt từ kênh GBPJPY EURUSD...</div></div>
-            <div class="card"><div class="card-header"><span class="channel-name">Hệ thống</span><span class="tag">Tiếng Việt</span></div><div class="update-time">Đang kết nối...</div><div class="content">Hệ thống đang quét tín hiệu tiếng Việt từ kênh Hệ thống...</div></div>
+        <p>Hệ thống tự động cào dữ liệu, dịch thuật Tiếng Việt và trích xuất biểu đồ phân tích 24/7</p>
+        <div class="status-badge">
+            <span class="pulse-dot"></span> Quét tự động 15 phút/lần
         </div>
     </div>
+
+    <div class="grid">
+        <div class="card">
+            <div class="card-header"><span class="channel-name">Data Trader</span><span class="tag">Tiếng Việt</span></div>
+            <div class="update-time">Đang kết nối...</div>
+            <div class="content">Hệ thống đang quét tín hiệu mới từ kênh Data Trader...</div>
+        </div>
+        <div class="card">
+            <div class="card-header"><span class="channel-name">VinaFunder</span><span class="tag">Tiếng Việt</span></div>
+            <div class="update-time">Đang kết nối...</div>
+            <div class="content">Hệ thống đang quét tín hiệu mới từ kênh VinaFunder...</div>
+        </div>
+        <div class="card">
+            <div class="card-header"><span class="channel-name">Trader Gauls</span><span class="tag">Tiếng Việt</span></div>
+            <div class="update-time">Đang kết nối...</div>
+            <div class="content">Hệ thống đang quét tín hiệu mới từ kênh Trader Gauls...</div>
+        </div>
+        <div class="card">
+            <div class="card-header"><span class="channel-name">GBPJPY EURUSD</span><span class="tag">Tiếng Việt</span></div>
+            <div class="update-time">Đang kết nối...</div>
+            <div class="content">Hệ thống đang quét tín hiệu mới từ kênh GBPJPY EURUSD...</div>
+        </div>
+        <div class="card">
+            <div class="card-header"><span class="channel-name">Hệ thống</span><span class="tag">Tiếng Việt</span></div>
+            <div class="update-time">Đang kết nối...</div>
+            <div class="content">Hệ thống đang quét tín hiệu mới từ kênh Hệ thống...</div>
+        </div>
+    </div>
+
+    <footer>
+        © 2026 Trading Dashboard • Tự động dọn dẹp ảnh cũ quá 30 ngày
+    </footer>
+
 </body>
 </html>
