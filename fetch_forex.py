@@ -17,7 +17,8 @@ PORT = 10000
 TARGET_CHANNELS = ["Data Trader", "VinaFunder", "Trader Gauls", "GBPJPY EURUSD", "Hệ thống"]
 translator = GoogleTranslator(source='auto', target='vi')
 
-last_msg_ids = {}
+# Lưu lịch sử tối đa 5 bài viết cho mỗi kênh
+channel_posts = {ch: [] for ch in TARGET_CHANNELS}
 
 class CustomHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
@@ -71,12 +72,12 @@ def process_and_translate(text):
     keywords = ["Entry", "Stop loss", "Take profit", "TP", "SL", "Breakout", "Overbought", "Oversold", "Kháng cự", "Hỗ trợ"]
     for kw in keywords:
         pattern = re.compile(rf'({kw})', re.IGNORECASE)
-        translated = pattern.sub(r'<span style="background: #fff3cd; color: #856404; padding: 2px 5px; border-radius: 3px; font-weight: bold;">\1</span>', translated)
+        translated = pattern.sub(r'<span style="background: rgba(240, 185, 11, 0.2); color: #f0b90b; padding: 2px 5px; border-radius: 3px; font-weight: bold;">\1</span>', translated)
 
     return translated
 
 async def update_dashboard(client):
-    print(f"[{datetime.now().strftime('%H:%M:%S')}] Quét bài viết mới & ảnh phân tích (Chu kỳ 15 phút)...")
+    print(f"[{datetime.now().strftime('%H:%M:%S')}] Quét bài viết mới (Giữ 5 bài gần nhất)...")
     base_dir = os.path.dirname(__file__)
     html_path = os.path.join(base_dir, 'giao-dien', 'index.html')
     img_dir = os.path.join(base_dir, 'giao-dien', 'images')
@@ -106,12 +107,13 @@ async def update_dashboard(client):
                 msgs = await client.get_messages(target, limit=1)
                 if msgs and (msgs[0].text or msgs[0].media):
                     msg = msgs[0]
-                    if last_msg_ids.get(ch_name) == msg.id:
+                    
+                    # Kiểm tra nếu bài viết đã tồn tại trong danh sách
+                    existing_ids = [p['id'] for p in channel_posts.get(ch_name, [])]
+                    if msg.id in existing_ids:
                         continue
 
-                    last_msg_ids[ch_name] = msg.id
                     has_update = True
-                    
                     msg_time = msg.date.strftime('%H:%M - %d/%m/%Y')
                     processed_text = process_and_translate(msg.text or "")
                     
@@ -122,16 +124,26 @@ async def update_dashboard(client):
                         img_save_path = os.path.join(img_dir, img_filename)
                         
                         await client.download_media(msg.media, file=img_save_path)
-                        img_html = f'<div style="margin-top: 12px;"><img src="images/{img_filename}" style="max-width:100%; border-radius:8px; border:1px solid #ddd;" alt="Biểu đồ phân tích"></div>'
+                        img_html = f'<div style="margin-top: 10px;"><img src="images/{img_filename}" style="max-width:100%; border-radius:8px; border:1px solid #2a2e3d;" alt="Biểu đồ phân tích"></div>'
                     
-                    final_content = f"{processed_text}{img_html}"
+                    post_item = {
+                        'id': msg.id,
+                        'html': f'<div class="post-item" style="border-bottom: 1px dashed #2a2e3d; padding-bottom: 16px; margin-bottom: 16px;"><div class="update-time" style="color:#848e9c; font-size:12px; margin-bottom:6px;">🕒 {msg_time}</div><div class="content-body">{processed_text}{img_html}</div></div>'
+                    }
 
-                    pattern_time = rf'(<span class="channel-name">{re.escape(ch_name)}</span>.*?<div class="update-time">).*?(</div>)'
-                    pattern_content = rf'(<span class="channel-name">{re.escape(ch_name)}</span>.*?<div class="content">).*?(</div>)'
+                    # Thêm bài viết mới lên ĐẦU danh sách
+                    channel_posts[ch_name].insert(0, post_item)
                     
-                    html_content = re.sub(pattern_time, rf'\g<1>{msg_time}\2', html_content, flags=re.DOTALL)
-                    html_content = re.sub(pattern_content, rf'\g<1>{final_content}\2', html_content, flags=re.DOTALL)
-                    print(f"[+ SUCCESS] Cập nhật bài mới + ảnh từ {ch_name}")
+                    # Giới hạn giữ tối đa 5 bài
+                    if len(channel_posts[ch_name]) > 5:
+                        channel_posts[ch_name] = channel_posts[ch_name][:5]
+
+                    # Ghép 5 bài thành 1 chuỗi HTML
+                    full_posts_html = "".join([p['html'] for p in channel_posts[ch_name]])
+
+                    pattern_content = rf'(<span class="channel-name">{re.escape(ch_name)}</span>.*?<div class="content">).*?(</div>\s*</div>)'
+                    html_content = re.sub(pattern_content, rf'\g<1>{full_posts_html}\2', html_content, flags=re.DOTALL)
+                    print(f"[+ SUCCESS] Thêm bài mới cho {ch_name} (Tổng: {len(channel_posts[ch_name])}/5 bài)")
 
         if has_update:
             with open(html_path, 'w', encoding='utf-8') as f:
@@ -150,7 +162,7 @@ async def main():
     print("Telethon Client kết nối thành công!")
     while True:
         await update_dashboard(client)
-        await asyncio.sleep(900) # Quét 15 phút/lần
+        await asyncio.sleep(900)
 
 if __name__ == "__main__":
     loop = asyncio.new_event_loop()
